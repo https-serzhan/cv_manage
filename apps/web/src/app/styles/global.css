@@ -11,10 +11,41 @@ body {
   width: min(100%, 340px);
 }
 
+.app-header__auth {
+  min-width: max-content;
+}
+
+.app-header__user-name {
+  max-width: 180px;
+}
+
 .global-search {
   width: 100%;
 }
 
 .home-page {
   max-width: 720px;
+}
+
+.sign-in-page {
+  max-width: 420px;
+}
+
+.sign-in-panel {
+  padding-top: 2rem;
+}
+
+.auth-provider-button {
+  width: 100%;
+}
+
+@media (max-width: 767.98px) {
+  .app-header__search {
+    order: 3;
+    width: 100%;
+  }
+
+  .app-header__auth {
+    margin-left: auto;
+  }
 }

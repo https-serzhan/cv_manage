@@ -4,6 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { AppLayout } from "../layouts/AppLayout";
 
 const HomePage = lazy(() => import("../../pages/home/HomePage"));
+const SignInPage = lazy(() => import("../../pages/sign-in/SignInPage"));
 
 const router = createBrowserRouter([
   {
@@ -13,6 +14,10 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <HomePage />
+      },
+      {
+        path: "sign-in",
+        element: <SignInPage />
       }
     ]
   }
