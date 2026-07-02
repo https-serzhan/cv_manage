@@ -8,6 +8,7 @@ import morgan from "morgan";
 import passport from "passport";
 
 import { authRouter } from "../modules/auth/auth.routes.js";
+import { attributesRouter } from "../modules/attributes/attributes.routes.js";
 import { configurePassport } from "../modules/auth/passport.js";
 import { healthRouter } from "../modules/health/health.routes.js";
 import { env } from "./env.js";
@@ -61,6 +62,7 @@ export function createApp(): Express {
 
   app.use("/health", healthRouter);
   app.use("/auth", authRouter);
+  app.use("/api/attributes", attributesRouter);
 
   app.use(notFoundMiddleware);
   app.use(errorMiddleware);

@@ -67,11 +67,7 @@ authRouter.get(
   })
 );
 
-authRouter.get(
-  "/google/callback",
-  disabledProviderGuard("google"),
-  providerCallback("google")
-);
+authRouter.get("/google/callback", disabledProviderGuard("google"), providerCallback("google"));
 
 authRouter.get(
   "/github",
@@ -81,11 +77,7 @@ authRouter.get(
   })
 );
 
-authRouter.get(
-  "/github/callback",
-  disabledProviderGuard("github"),
-  providerCallback("github")
-);
+authRouter.get("/github/callback", disabledProviderGuard("github"), providerCallback("github"));
 
 authRouter.get("/me", (request, response) => {
   const currentUser = isAuthenticatedUser(request.user) ? request.user : null;

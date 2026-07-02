@@ -1,9 +1,6 @@
 import passport from "passport";
 import type { Profile as PassportProfile } from "passport";
-import {
-  Strategy as GitHubStrategy,
-  type Profile as GitHubProfile
-} from "passport-github2";
+import { Strategy as GitHubStrategy, type Profile as GitHubProfile } from "passport-github2";
 import {
   Strategy as GoogleStrategy,
   type Profile as GoogleProfile,
@@ -23,7 +20,9 @@ const enabledProviders: Record<AuthProvider, boolean> = {
 
 let isConfigured = false;
 
-function firstProfileValue(values: PassportProfile["emails"] | PassportProfile["photos"]): string | null {
+function firstProfileValue(
+  values: PassportProfile["emails"] | PassportProfile["photos"]
+): string | null {
   return values?.[0]?.value ?? null;
 }
 
