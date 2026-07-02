@@ -62,3 +62,48 @@ model UserPreference {
   version   Int      @default(1)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+enum AttributeType {
+  STRING
+  TEXT
+  IMAGE
+  NUMERIC
+  DATE
+  PERIOD
+  BOOLEAN
+  DROPDOWN
+}
+
+model AttributeCategory {
+  id         String      @id @default(cuid())
+  name       String      @unique
+  createdAt  DateTime    @default(now())
+  attributes Attribute[]
+}
+
+model Attribute {
+  id          String            @id @default(cuid())
+  categoryId  String
+  name        String            @unique
+  description String?
+  type        AttributeType
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  version     Int               @default(1)
+  category    AttributeCategory @relation(fields: [categoryId], references: [id])
+  options     AttributeOption[]
+
+  @@index([categoryId])
+}
+
+model AttributeOption {
+  id          String    @id @default(cuid())
+  attributeId String
+  value       String
+  sortOrder   Int
+  createdAt   DateTime  @default(now())
+  attribute   Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+
+  @@unique([attributeId, value])
+  @@index([attributeId])
+}

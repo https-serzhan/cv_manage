@@ -1,15 +1,15 @@
 # CV Management Platform
 
-Starter monorepo for a CV management and recruitment platform.
+Monorepo for a CV management and recruitment platform.
 
 ## Stack
 
 - pnpm workspaces
 - React, Vite, React Router, Bootstrap, React-Bootstrap
-- Express, TypeScript, Prisma, PostgreSQL
+- Express, TypeScript, Passport, Prisma, PostgreSQL
 - Docker Compose for local PostgreSQL
 
-## Project Structure
+## Structure
 
 ```text
 cv-management-platform/
@@ -22,99 +22,97 @@ cv-management-platform/
 
 ## Setup
 
-1. Install pnpm if needed:
-
-   ```bash
-   corepack enable
-   corepack prepare pnpm@latest --activate
-   ```
-
-2. Install dependencies:
+1. Install dependencies:
 
    ```bash
    pnpm install
    ```
 
-3. Make sure Docker is installed and available on your PATH, then start local PostgreSQL:
-
-   ```bash
-   pnpm db:up
-   ```
-
-4. Create environment files:
+2. Create local environment files:
 
    ```bash
    cp apps/api/.env.example apps/api/.env
    cp apps/web/.env.example apps/web/.env
    ```
 
-5. Generate Prisma Client:
+3. Start PostgreSQL:
+
+   ```bash
+   pnpm db:up
+   ```
+
+4. Prepare Prisma:
 
    ```bash
    pnpm prisma:generate
-   ```
-
-6. Run the initial Prisma migration when the database is running:
-
-   ```bash
    pnpm prisma:migrate
+   pnpm prisma:seed
    ```
 
-7. Start the backend:
+5. Start the API:
 
    ```bash
    pnpm dev:api
    ```
 
-8. Start the frontend in another terminal:
+6. Start the web app:
 
    ```bash
    pnpm dev:web
    ```
 
+## Authentication
+
+The API supports Google and GitHub OAuth through Passport sessions. Local sessions use Express MemoryStore and should be replaced with a durable store before production deployment.
+
+OAuth routes stay disabled until provider credentials are configured:
+
+```text
+GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET
+GITHUB_CLIENT_ID
+GITHUB_CLIENT_SECRET
+```
+
+Local callback URLs:
+
+```text
+http://localhost:4000/auth/google/callback
+http://localhost:4000/auth/github/callback
+```
+
 ## Verification
 
-- Frontend: open `http://localhost:5173` and confirm the page shows `CV Management Platform` and `Hello, world.`
-- Backend: open `http://localhost:4000/health` or run:
+```bash
+pnpm db:up
+pnpm prisma:generate
+pnpm prisma:migrate
+pnpm prisma:seed
+pnpm typecheck
+pnpm lint
+pnpm build
+```
 
-  ```bash
-  curl http://localhost:4000/health
-  ```
+Useful local checks:
 
-- PostgreSQL: run:
+```bash
+curl http://localhost:4000/health
+curl http://localhost:4000/auth/me
+```
 
-  ```bash
-  docker compose ps
-  ```
-
-  The `postgres` service should be running and healthy.
-
-- Prisma: run:
-
-  ```bash
-  pnpm prisma:generate
-  pnpm prisma:migrate
-  ```
-
-  The current schema contains only a temporary `SetupCheck` model for confirming the Prisma setup.
+The web app runs at `http://localhost:5173`.
 
 ## Scripts
 
-- `pnpm dev` - run web and API development servers
-- `pnpm dev:web` - run only the web app
-- `pnpm dev:api` - run only the API
-- `pnpm build` - build all workspace packages
-- `pnpm lint` - lint all workspace packages
-- `pnpm typecheck` - typecheck all workspace packages
-- `pnpm db:up` - start local PostgreSQL
-- `pnpm db:down` - stop local PostgreSQL
-- `pnpm prisma:generate` - generate Prisma Client
-- `pnpm prisma:migrate` - run a development migration
-- `pnpm prisma:deploy` - deploy migrations
-- `pnpm prisma:studio` - open Prisma Studio
-
-## Notes
-
-- Authentication and business features are intentionally not implemented yet.
-- The full domain database model is intentionally not created yet.
-- The shared package contains only basic placeholder types and does not expose database models.
+- `pnpm dev` runs the web and API development servers
+- `pnpm dev:web` runs the web app
+- `pnpm dev:api` runs the API
+- `pnpm build` builds all workspace packages
+- `pnpm lint` lints all workspace packages
+- `pnpm typecheck` typechecks all workspace packages
+- `pnpm db:up` starts local PostgreSQL
+- `pnpm db:down` stops local PostgreSQL
+- `pnpm prisma:generate` generates Prisma Client
+- `pnpm prisma:migrate` runs development migrations
+- `pnpm prisma:deploy` deploys migrations
+- `pnpm prisma:studio` opens Prisma Studio

@@ -8,6 +8,17 @@ const roles = [
   { code: "ADMIN", name: "Admin" }
 ] as const;
 
+const attributeCategories = [
+  "Personal Information",
+  "Certification",
+  "Domain Knowledge",
+  "Soft Skills",
+  "Technical Skills",
+  "Language",
+  "Education",
+  "Other"
+] as const;
+
 async function main() {
   for (const role of roles) {
     await prisma.role.upsert({
@@ -16,8 +27,12 @@ async function main() {
       create: role
     });
   }
+  await prisma.attributeCategory.createMany({
+    data: attributeCategories.map((name) => ({ name })),
+    skipDuplicates: true
+  });
 
-  console.info("Seed completed: foundation roles are present.");
+  console.info("Seed completed: roles and attribute categories are present.");
 }
 
 main()
