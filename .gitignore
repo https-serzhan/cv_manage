@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+.vite/
+.DS_Store
+package-lock.json
+.env
+.env.local
+.env.*.local
+*.log
+pnpm-debug.log*
+Dockerfile.local
+generated/
+.idea/

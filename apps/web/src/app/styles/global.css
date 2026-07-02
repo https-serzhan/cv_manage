@@ -1,0 +1,20 @@
+body {
+  min-width: 320px;
+  background: #f7f8fa;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-header__search {
+  width: min(100%, 340px);
+}
+
+.global-search {
+  width: 100%;
+}
+
+.home-page {
+  max-width: 720px;
+}

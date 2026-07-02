@@ -1,0 +1,39 @@
+{
+  "name": "cv-management-platform",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter @cv-platform/web --filter @cv-platform/api dev",
+    "dev:web": "pnpm --filter @cv-platform/web dev",
+    "dev:api": "pnpm --filter @cv-platform/api dev",
+    "build": "pnpm -r build",
+    "build:web": "pnpm --filter @cv-platform/web build",
+    "build:api": "pnpm --filter @cv-platform/api build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down",
+    "prisma:generate": "pnpm --filter @cv-platform/api prisma:generate",
+    "prisma:migrate": "pnpm --filter @cv-platform/api prisma:migrate",
+    "prisma:deploy": "pnpm --filter @cv-platform/api prisma:deploy",
+    "prisma:studio": "pnpm --filter @cv-platform/api prisma:studio",
+    "prisma:seed": "pnpm --filter @cv-platform/api prisma:seed"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@types/node": "^22.10.2",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "^9.1.0",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.2"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}
