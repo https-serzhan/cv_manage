@@ -16,6 +16,11 @@ export function AppHeader() {
         <Navbar.Brand as={Link} to={routes.home} className="fw-semibold">
           CV Management Platform
         </Navbar.Brand>
+        <Nav className="app-header__nav">
+          <Nav.Link as={Link} to={routes.attributes}>
+            Attributes
+          </Nav.Link>
+        </Nav>
         <div className="app-header__search ms-auto">
           <GlobalSearch />
         </div>

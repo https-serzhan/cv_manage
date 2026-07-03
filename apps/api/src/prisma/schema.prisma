@@ -19,6 +19,7 @@ model User {
   roles                UserRole[]
   authProviderAccounts AuthProviderAccount[]
   preference           UserPreference?
+  candidateProfile     CandidateProfile?
 }
 
 model Role {
@@ -82,28 +83,115 @@ model AttributeCategory {
 }
 
 model Attribute {
-  id          String            @id @default(cuid())
-  categoryId  String
-  name        String            @unique
-  description String?
-  type        AttributeType
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  version     Int               @default(1)
-  category    AttributeCategory @relation(fields: [categoryId], references: [id])
-  options     AttributeOption[]
+  id              String                    @id @default(cuid())
+  categoryId      String
+  name            String                    @unique
+  description     String?
+  type            AttributeType
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+  version         Int                       @default(1)
+  category        AttributeCategory         @relation(fields: [categoryId], references: [id])
+  options         AttributeOption[]
+  candidateValues CandidateAttributeValue[]
 
   @@index([categoryId])
 }
 
 model AttributeOption {
-  id          String    @id @default(cuid())
-  attributeId String
-  value       String
-  sortOrder   Int
-  createdAt   DateTime  @default(now())
-  attribute   Attribute @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  id              String                    @id @default(cuid())
+  attributeId     String
+  value           String
+  sortOrder       Int
+  createdAt       DateTime                  @default(now())
+  attribute       Attribute                 @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  candidateValues CandidateAttributeValue[]
 
   @@unique([attributeId, value])
   @@index([attributeId])
+}
+
+model CandidateProfile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  headline       String?
+  summary        String?  @db.Text
+  location       String?
+  avatarImageUrl String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  version        Int      @default(1)
+
+  user            User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attributeValues CandidateAttributeValue[]
+  projects        CandidateProject[]
+}
+
+model CandidateAttributeValue {
+  id                 String @id @default(cuid())
+  candidateProfileId String
+  attributeId        String
+
+  stringValue      String?
+  textValue        String?   @db.Text
+  imageUrl         String?
+  numericValue     Decimal?  @db.Decimal(18, 4)
+  dateValue        DateTime? @db.Date
+  periodStart      DateTime? @db.Date
+  periodEnd        DateTime? @db.Date
+  booleanValue     Boolean?
+  selectedOptionId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  version   Int      @default(1)
+
+  candidateProfile CandidateProfile @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  attribute        Attribute        @relation(fields: [attributeId], references: [id], onDelete: Cascade)
+  selectedOption   AttributeOption? @relation(fields: [selectedOptionId], references: [id], onDelete: SetNull)
+
+  @@unique([candidateProfileId, attributeId])
+  @@index([candidateProfileId])
+  @@index([attributeId])
+  @@index([selectedOptionId])
+}
+
+model CandidateProject {
+  id                 String    @id @default(cuid())
+  candidateProfileId String
+  title              String
+  description        String?   @db.Text
+  role               String?
+  url                String?
+  startDate          DateTime? @db.Date
+  endDate            DateTime? @db.Date
+  isCurrent          Boolean   @default(false)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  version            Int       @default(1)
+
+  candidateProfile CandidateProfile      @relation(fields: [candidateProfileId], references: [id], onDelete: Cascade)
+  tags             CandidateProjectTag[]
+
+  @@index([candidateProfileId])
+}
+
+model ProjectTag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  projects CandidateProjectTag[]
+}
+
+model CandidateProjectTag {
+  projectId String
+  tagId     String
+  createdAt DateTime @default(now())
+
+  project CandidateProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tag     ProjectTag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, tagId])
+  @@index([tagId])
 }

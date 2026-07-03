@@ -5,6 +5,9 @@ import { AppLayout } from "../layouts/AppLayout";
 
 const HomePage = lazy(() => import("../../pages/home/HomePage"));
 const SignInPage = lazy(() => import("../../pages/sign-in/SignInPage"));
+const AttributeLibraryPage = lazy(
+  () => import("../../pages/attribute-library/ui/AttributeLibraryPage")
+);
 
 const router = createBrowserRouter([
   {
@@ -18,6 +21,10 @@ const router = createBrowserRouter([
       {
         path: "sign-in",
         element: <SignInPage />
+      },
+      {
+        path: "attributes",
+        element: <AttributeLibraryPage />
       }
     ]
   }
