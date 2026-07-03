@@ -64,7 +64,8 @@ export function AttributeForm({
     setValues((currentValues) => ({
       ...currentValues,
       type,
-      options: type === "DROPDOWN" ? currentValues.options?.length ? currentValues.options : [""] : []
+      options:
+        type === "DROPDOWN" ? (currentValues.options?.length ? currentValues.options : [""]) : []
     }));
   }
 

@@ -1,12 +1,5 @@
 export type AttributeType =
-  | "STRING"
-  | "TEXT"
-  | "IMAGE"
-  | "NUMERIC"
-  | "DATE"
-  | "PERIOD"
-  | "BOOLEAN"
-  | "DROPDOWN";
+  "STRING" | "TEXT" | "IMAGE" | "NUMERIC" | "DATE" | "PERIOD" | "BOOLEAN" | "DROPDOWN";
 
 export const attributeTypes = [
   "STRING",

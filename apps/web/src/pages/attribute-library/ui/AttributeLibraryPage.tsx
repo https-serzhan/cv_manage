@@ -1,14 +1,5 @@
 import { useMemo, useState } from "react";
-import {
-  Alert,
-  Badge,
-  Button,
-  ButtonGroup,
-  Form,
-  Spinner,
-  Stack,
-  Table
-} from "react-bootstrap";
+import { Alert, Badge, Button, ButtonGroup, Form, Spinner, Stack, Table } from "react-bootstrap";
 
 import type { Attribute, GetAttributesParams } from "../../../entities/attribute/model/types";
 import {
@@ -92,9 +83,7 @@ export default function AttributeLibraryPage() {
         <div className="attribute-library-page__header">
           <div>
             <h1 className="h3 mb-1">Attribute Library</h1>
-            <p className="text-secondary mb-0">
-              Manage reusable candidate and CV attributes.
-            </p>
+            <p className="text-secondary mb-0">Manage reusable candidate and CV attributes.</p>
           </div>
           {attributesQuery.isFetching && !isInitialLoading ? (
             <Badge bg="secondary">Updating</Badge>
@@ -164,7 +153,9 @@ export default function AttributeLibraryPage() {
                   return (
                     <tr
                       key={attribute.id}
-                      className={isSelected ? "table-active attribute-table__row" : "attribute-table__row"}
+                      className={
+                        isSelected ? "table-active attribute-table__row" : "attribute-table__row"
+                      }
                       onClick={() => setSelectedAttributeId(attribute.id)}
                     >
                       <td>
