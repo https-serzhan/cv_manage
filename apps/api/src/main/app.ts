@@ -12,6 +12,7 @@ import { attributesRouter } from "../modules/attributes/attributes.routes.js";
 import { configurePassport } from "../modules/auth/passport.js";
 import { healthRouter } from "../modules/health/health.routes.js";
 import { profileRouter } from "../modules/profile/profile.routes.js";
+import { positionsRouter } from "../modules/positions/positions.routes.js";
 import { env } from "./env.js";
 import { logger } from "../shared/logger/index.js";
 import { errorMiddleware } from "../shared/middleware/error-handler.js";
@@ -65,6 +66,7 @@ export function createApp(): Express {
   app.use("/auth", authRouter);
   app.use("/api/attributes", attributesRouter);
   app.use("/api/profile", profileRouter);
+  app.use("/api/positions", positionsRouter);
 
   app.use(notFoundMiddleware);
   app.use(errorMiddleware);

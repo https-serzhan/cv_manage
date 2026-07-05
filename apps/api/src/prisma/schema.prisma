@@ -8,18 +8,20 @@ datasource db {
 }
 
 model User {
-  id                   String                @id @default(cuid())
-  email                String                @unique
+  id                   String                    @id @default(cuid())
+  email                String                    @unique
   displayName          String
   avatarUrl            String?
-  isBlocked            Boolean               @default(false)
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-  version              Int                   @default(1)
+  isBlocked            Boolean                   @default(false)
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
+  version              Int                       @default(1)
   roles                UserRole[]
   authProviderAccounts AuthProviderAccount[]
   preference           UserPreference?
   candidateProfile     CandidateProfile?
+  createdPositions     Position[]                @relation("PositionCreatedBy")
+  positionAccess       PositionCandidateAccess[] @relation("PositionCandidateAccessUser")
 }
 
 model Role {
@@ -75,6 +77,11 @@ enum AttributeType {
   DROPDOWN
 }
 
+enum PositionAccessMode {
+  PUBLIC
+  RESTRICTED
+}
+
 model AttributeCategory {
   id         String      @id @default(cuid())
   name       String      @unique
@@ -83,17 +90,18 @@ model AttributeCategory {
 }
 
 model Attribute {
-  id              String                    @id @default(cuid())
-  categoryId      String
-  name            String                    @unique
-  description     String?
-  type            AttributeType
-  createdAt       DateTime                  @default(now())
-  updatedAt       DateTime                  @updatedAt
-  version         Int                       @default(1)
-  category        AttributeCategory         @relation(fields: [categoryId], references: [id])
-  options         AttributeOption[]
-  candidateValues CandidateAttributeValue[]
+  id                 String                    @id @default(cuid())
+  categoryId         String
+  name               String                    @unique
+  description        String?
+  type               AttributeType
+  createdAt          DateTime                  @default(now())
+  updatedAt          DateTime                  @updatedAt
+  version            Int                       @default(1)
+  category           AttributeCategory         @relation(fields: [categoryId], references: [id])
+  options            AttributeOption[]
+  candidateValues    CandidateAttributeValue[]
+  positionAttributes PositionAttribute[]
 
   @@index([categoryId])
 }
@@ -181,7 +189,8 @@ model ProjectTag {
   name      String   @unique
   createdAt DateTime @default(now())
 
-  projects CandidateProjectTag[]
+  projects     CandidateProjectTag[]
+  positionTags PositionProjectTag[]
 }
 
 model CandidateProjectTag {
@@ -194,4 +203,64 @@ model CandidateProjectTag {
 
   @@id([projectId, tagId])
   @@index([tagId])
+}
+
+model Position {
+  id          String             @id @default(cuid())
+  title       String
+  description String?            @db.Text
+  accessMode  PositionAccessMode @default(PUBLIC)
+  maxProjects Int?
+  createdById String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  version     Int                @default(1)
+
+  createdBy       User?                     @relation("PositionCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  attributes      PositionAttribute[]
+  projectTags     PositionProjectTag[]
+  candidateAccess PositionCandidateAccess[]
+
+  @@index([title])
+  @@index([createdById])
+  @@index([accessMode])
+}
+
+model PositionAttribute {
+  positionId  String
+  attributeId String
+  sortOrder   Int
+  isRequired  Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  position  Position  @relation(fields: [positionId], references: [id], onDelete: Cascade)
+  attribute Attribute @relation(fields: [attributeId], references: [id], onDelete: Restrict)
+
+  @@id([positionId, attributeId])
+  @@unique([positionId, sortOrder])
+  @@index([attributeId])
+}
+
+model PositionProjectTag {
+  positionId String
+  tagId      String
+  createdAt  DateTime @default(now())
+
+  position Position   @relation(fields: [positionId], references: [id], onDelete: Cascade)
+  tag      ProjectTag @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([positionId, tagId])
+  @@index([tagId])
+}
+
+model PositionCandidateAccess {
+  positionId      String
+  candidateUserId String
+  createdAt       DateTime @default(now())
+
+  position  Position @relation(fields: [positionId], references: [id], onDelete: Cascade)
+  candidate User     @relation("PositionCandidateAccessUser", fields: [candidateUserId], references: [id], onDelete: Cascade)
+
+  @@id([positionId, candidateUserId])
+  @@index([candidateUserId])
 }
