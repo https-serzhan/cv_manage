@@ -9,6 +9,7 @@ const AttributeLibraryPage = lazy(
   () => import("../../pages/attribute-library/ui/AttributeLibraryPage")
 );
 const ProfilePage = lazy(() => import("../../pages/profile/ui/ProfilePage"));
+const PositionsPage = lazy(() => import("../../pages/positions/ui/PositionsPage"));
 
 const router = createBrowserRouter([
   {
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
       {
         path: "profile",
         element: <ProfilePage />
+      },
+      {
+        path: "positions",
+        element: <PositionsPage />
       }
     ]
   }

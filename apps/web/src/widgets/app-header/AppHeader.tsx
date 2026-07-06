@@ -23,6 +23,9 @@ export function AppHeader() {
           <Nav.Link as={Link} to={routes.profile}>
             Profile
           </Nav.Link>
+          <Nav.Link as={Link} to={routes.positions}>
+            Positions
+          </Nav.Link>
         </Nav>
         <div className="app-header__search ms-auto">
           <GlobalSearch />
