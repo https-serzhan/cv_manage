@@ -10,6 +10,7 @@ import passport from "passport";
 import { authRouter } from "../modules/auth/auth.routes.js";
 import { attributesRouter } from "../modules/attributes/attributes.routes.js";
 import { configurePassport } from "../modules/auth/passport.js";
+import { cvsRouter } from "../modules/cvs/cvs.routes.js";
 import { healthRouter } from "../modules/health/health.routes.js";
 import { profileRouter } from "../modules/profile/profile.routes.js";
 import { positionsRouter } from "../modules/positions/positions.routes.js";
@@ -67,6 +68,7 @@ export function createApp(): Express {
   app.use("/api/attributes", attributesRouter);
   app.use("/api/profile", profileRouter);
   app.use("/api/positions", positionsRouter);
+  app.use("/api/cvs", cvsRouter);
 
   app.use(notFoundMiddleware);
   app.use(errorMiddleware);
