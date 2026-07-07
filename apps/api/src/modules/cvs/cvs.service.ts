@@ -113,8 +113,7 @@ function formatAttributeValue(
   if (type === AttributeType.BOOLEAN) {
     return {
       value: value.booleanValue ?? null,
-      displayValue:
-        value.booleanValue == null ? null : value.booleanValue ? "Yes" : "No"
+      displayValue: value.booleanValue == null ? null : value.booleanValue ? "Yes" : "No"
     };
   }
 
@@ -175,7 +174,9 @@ function filterProjects(position: CvPositionRecord, projects: CvProjectRecord[])
 
   const sortedProjects = [...filteredProjects].sort(compareProjects);
 
-  return position.maxProjects == null ? sortedProjects : sortedProjects.slice(0, position.maxProjects);
+  return position.maxProjects == null
+    ? sortedProjects
+    : sortedProjects.slice(0, position.maxProjects);
 }
 
 function toCandidateDto(profile: CvCandidateProfileRecord) {
@@ -218,9 +219,7 @@ export const cvsService = {
       cvsRepository.findCandidateAttributeValues(profile.id, attributeIds),
       cvsRepository.findCandidateProjects(profile.id)
     ]);
-    const valueByAttributeId = new Map(
-      attributeValues.map((value) => [value.attributeId, value])
-    );
+    const valueByAttributeId = new Map(attributeValues.map((value) => [value.attributeId, value]));
     const missingRequiredAttributes: CvMissingRequiredAttribute[] = [];
 
     const attributes = position.attributes.map((positionAttribute) => {

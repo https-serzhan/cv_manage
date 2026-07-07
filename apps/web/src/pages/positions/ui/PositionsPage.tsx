@@ -11,6 +11,7 @@ import {
   Spinner,
   Table
 } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 import { useAttributesQuery } from "../../../entities/attribute/model/queries";
 import {
@@ -34,6 +35,7 @@ import type {
   UpdatePositionPayload
 } from "../../../entities/position/model/types";
 import { getApiErrorMessage } from "../../../shared/api/client";
+import { routes } from "../../../shared/routes/paths";
 
 type PositionFilters = {
   prefix: string;
@@ -80,6 +82,7 @@ function formatCommaSeparatedValues(values: string[]) {
 }
 
 export default function PositionsPage() {
+  const navigate = useNavigate();
   const [filters, setFilters] = useState<PositionFilters>(initialFilters);
   const [selectedPositionId, setSelectedPositionId] = useState<string | null>(null);
   const [activeAction, setActiveAction] = useState<ToolbarAction>(null);
@@ -206,6 +209,14 @@ export default function PositionsPage() {
       payload
     });
     setActiveAction(null);
+  }
+
+  function previewSelectedPosition() {
+    if (!selectedPositionId) {
+      return;
+    }
+
+    navigate(routes.cvPreview(selectedPositionId));
   }
 
   const canGoPrevious = filters.page > 1;
@@ -339,6 +350,14 @@ export default function PositionsPage() {
               onClick={() => setActiveAction("access")}
             >
               Access
+            </Button>
+
+            <Button
+              variant="outline-secondary"
+              disabled={!selectedPositionId}
+              onClick={previewSelectedPosition}
+            >
+              Preview CV
             </Button>
 
             <Button

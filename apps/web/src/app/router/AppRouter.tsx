@@ -8,6 +8,7 @@ const SignInPage = lazy(() => import("../../pages/sign-in/SignInPage"));
 const AttributeLibraryPage = lazy(
   () => import("../../pages/attribute-library/ui/AttributeLibraryPage")
 );
+const CvPreviewPage = lazy(() => import("../../pages/cv-preview/ui/CvPreviewPage"));
 const ProfilePage = lazy(() => import("../../pages/profile/ui/ProfilePage"));
 const PositionsPage = lazy(() => import("../../pages/positions/ui/PositionsPage"));
 
@@ -35,6 +36,10 @@ const router = createBrowserRouter([
       {
         path: "positions",
         element: <PositionsPage />
+      },
+      {
+        path: "cvs/preview/:positionId",
+        element: <CvPreviewPage />
       }
     ]
   }
