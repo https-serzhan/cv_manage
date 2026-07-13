@@ -29,6 +29,10 @@ function formatProjectDates(project: CvPreviewProjectDto) {
   }`;
 }
 
+function formatProjectTagNames(preview: CvPreviewDto) {
+  return preview.position.projectTags.map((tag) => tag.name).join(", ");
+}
+
 export default function CvPreviewPage() {
   const { positionId } = useParams<{ positionId: string }>();
   const previewQuery = useCvPreviewQuery(positionId ?? "", Boolean(positionId));
@@ -79,21 +83,108 @@ export default function CvPreviewPage() {
 
 function CvPreviewContent({ preview }: { preview: CvPreviewDto }) {
   const { candidate, position } = preview;
+  const missingRequiredCount = preview.missingRequiredAttributes.length;
+  const includedProjectCount = preview.projects.length;
+  const hasMissingRequiredAttributes = missingRequiredCount > 0;
+  const hasProjectTagFilter = position.projectTags.length > 0;
+  const isReady = missingRequiredCount === 0;
+  const projectTagNames = formatProjectTagNames(preview);
 
   return (
     <section className="profile-page">
       <Stack gap={4}>
         <div className="profile-page__header">
           <div>
-            <h1 className="h3 mb-1">{position.title}</h1>
+            <h1 className="h3 mb-1">CV Preview</h1>
             <p className="text-secondary mb-0">
-              CV preview generated {formatDateTime(preview.generatedAt)}
+              {position.title} · Generated {formatDateTime(preview.generatedAt)}
             </p>
           </div>
-          <Link className="btn btn-outline-secondary" to={routes.positions}>
-            Back to positions
-          </Link>
+          <div className="d-flex flex-wrap gap-2">
+            <Link className="btn btn-outline-secondary" to={routes.positions}>
+              Back to positions
+            </Link>
+            <Link className="btn btn-primary" to={routes.profile}>
+              Edit profile
+            </Link>
+          </div>
         </div>
+
+        <section className="profile-section">
+          <div className="profile-section__heading">
+            <div>
+              <h2 className="h5 mb-1">Readiness</h2>
+              <span className="text-secondary">
+                {isReady ? "Ready for this position" : "Needs attention before sharing"}
+              </span>
+            </div>
+            <Badge bg={isReady ? "success" : "warning"} text={isReady ? undefined : "dark"}>
+              {isReady ? "Ready" : "Needs attention"}
+            </Badge>
+          </div>
+
+          <Alert variant={isReady ? "success" : "warning"}>
+            {isReady
+              ? "All required attributes for this position are provided."
+              : "Required profile details are missing for this position."}
+          </Alert>
+
+          <Row className="g-3">
+            <Col md={3}>
+              <div className="text-muted small">Missing required attributes</div>
+              <strong>{missingRequiredCount}</strong>
+            </Col>
+            <Col md={3}>
+              <div className="text-muted small">Included projects</div>
+              <strong>{includedProjectCount}</strong>
+            </Col>
+            <Col md={3}>
+              <div className="text-muted small">Max projects</div>
+              <strong>{position.maxProjects ?? "No limit"}</strong>
+            </Col>
+            <Col md={3}>
+              <div className="text-muted small">Project tag filters</div>
+              {hasProjectTagFilter ? (
+                <div className="profile-tag-list mt-1">
+                  {position.projectTags.map((tag) => (
+                    <Badge bg="secondary" key={tag.id}>
+                      {tag.name}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <strong>All projects</strong>
+              )}
+            </Col>
+          </Row>
+        </section>
+
+        {hasMissingRequiredAttributes ? (
+          <Alert variant="warning" className="mb-0">
+            <div className="fw-semibold mb-2">Missing required attributes</div>
+            <p className="mb-2">
+              Update your profile to improve readiness for {position.title}.
+            </p>
+            <div className="profile-tag-list mb-3">
+              {preview.missingRequiredAttributes.map((attribute) => (
+                <Badge bg="warning" text="dark" key={attribute.attributeId}>
+                  {attribute.name} · {attribute.type}
+                </Badge>
+              ))}
+            </div>
+            <Link className="btn btn-outline-warning" to={routes.profile}>
+              Edit profile
+            </Link>
+          </Alert>
+        ) : null}
+
+        {includedProjectCount === 0 ? (
+          <Alert variant={hasProjectTagFilter ? "warning" : "info"} className="mb-0">
+            {hasProjectTagFilter
+              ? `No candidate projects matched the position project tags: ${projectTagNames}.`
+              : "No candidate projects are included in this preview."}
+          </Alert>
+        ) : null}
 
         <section className="profile-section">
           <div className="profile-section__heading">
@@ -174,19 +265,6 @@ function CvPreviewContent({ preview }: { preview: CvPreviewDto }) {
             </Col>
           </Row>
         </section>
-
-        {preview.missingRequiredAttributes.length > 0 ? (
-          <Alert variant="warning" className="mb-0">
-            <div className="fw-semibold mb-2">Missing required attributes</div>
-            <div className="profile-tag-list">
-              {preview.missingRequiredAttributes.map((attribute) => (
-                <Badge bg="warning" text="dark" key={attribute.attributeId}>
-                  {attribute.name} · {attribute.type}
-                </Badge>
-              ))}
-            </div>
-          </Alert>
-        ) : null}
 
         <section className="profile-section">
           <div className="profile-section__heading">
@@ -274,7 +352,9 @@ function CvPreviewContent({ preview }: { preview: CvPreviewDto }) {
             </Stack>
           ) : (
             <Alert variant="info" className="mb-0">
-              No projects matched this position's project filters.
+              {hasProjectTagFilter
+                ? `No projects matched the position project tags: ${projectTagNames}.`
+                : "No projects are available for this preview."}
             </Alert>
           )}
         </section>
