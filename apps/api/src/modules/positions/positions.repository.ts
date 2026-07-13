@@ -101,10 +101,55 @@ export type PositionAttributeData = {
   isRequired: boolean;
 };
 
+export type PositionVisibility = {
+  userId: string;
+  canSeeAll: boolean;
+} | null;
+
 type ProjectTag = {
   id: string;
   name: string;
 };
+
+function visiblePositionWhere(visibility: PositionVisibility): Prisma.PositionWhereInput {
+  if (visibility?.canSeeAll) {
+    return {};
+  }
+
+  if (!visibility) {
+    return {
+      accessMode: PositionAccessMode.PUBLIC
+    };
+  }
+
+  return {
+    OR: [
+      {
+        accessMode: PositionAccessMode.PUBLIC
+      },
+      {
+        candidateAccess: {
+          some: {
+            candidateUserId: visibility.userId
+          }
+        }
+      }
+    ]
+  };
+}
+
+function applyVisibility(
+  where: Prisma.PositionWhereInput,
+  visibility: PositionVisibility
+): Prisma.PositionWhereInput {
+  const visibilityWhere = visiblePositionWhere(visibility);
+
+  return Object.keys(visibilityWhere).length === 0
+    ? where
+    : {
+        AND: [where, visibilityWhere]
+      };
+}
 
 async function findOrCreateTags(
   tx: Prisma.TransactionClient,
@@ -204,23 +249,23 @@ async function replacePositionRelations(
 }
 
 export const positionsRepository = {
-  async findPositions(filters: ListPositionsQuery) {
+  async findPositions(filters: ListPositionsQuery, visibility: PositionVisibility) {
     const { prefix, accessMode, attributeId, projectTagId, page, pageSize } = filters;
-    const where: Prisma.PositionWhereInput = {};
+    const filterWhere: Prisma.PositionWhereInput = {};
 
     if (prefix) {
-      where.title = {
+      filterWhere.title = {
         startsWith: prefix,
         mode: "insensitive"
       };
     }
 
     if (accessMode) {
-      where.accessMode = accessMode;
+      filterWhere.accessMode = accessMode;
     }
 
     if (attributeId) {
-      where.attributes = {
+      filterWhere.attributes = {
         some: {
           attributeId
         }
@@ -228,13 +273,14 @@ export const positionsRepository = {
     }
 
     if (projectTagId) {
-      where.projectTags = {
+      filterWhere.projectTags = {
         some: {
           tagId: projectTagId
         }
       };
     }
 
+    const where = applyVisibility(filterWhere, visibility);
     const skip = (page - 1) * pageSize;
     const [items, total] = await prisma.$transaction([
       prisma.position.findMany({
@@ -262,6 +308,12 @@ export const positionsRepository = {
   findPositionById(id: string) {
     return prisma.position.findUnique({
       where: { id },
+      select: positionSelect
+    });
+  },
+  findVisiblePositionById(id: string, visibility: PositionVisibility) {
+    return prisma.position.findFirst({
+      where: applyVisibility({ id }, visibility),
       select: positionSelect
     });
   },

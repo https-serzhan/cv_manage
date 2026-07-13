@@ -10,6 +10,11 @@ import type {
 } from "./cvs.repository.js";
 
 type CvAttributeValue = string | boolean | null;
+export type CvPreviewViewer = {
+  userId: string;
+  roleCodes: string[];
+};
+
 type CvMissingRequiredAttribute = {
   attributeId: string;
   name: string;
@@ -193,27 +198,31 @@ function toCandidateDto(profile: CvCandidateProfileRecord) {
   };
 }
 
-function canPreviewPosition(position: CvPositionRecord, userId: string): boolean {
+function canPreviewPosition(position: CvPositionRecord, viewer: CvPreviewViewer): boolean {
   if (position.accessMode === PositionAccessMode.PUBLIC) {
     return true;
   }
 
-  return position.candidateAccess.some((access) => access.candidateUserId === userId);
+  if (viewer.roleCodes.includes("ADMIN")) {
+    return true;
+  }
+
+  return position.candidateAccess.some((access) => access.candidateUserId === viewer.userId);
 }
 
 export const cvsService = {
-  async getPreview(positionId: string, userId: string) {
+  async getPreview(positionId: string, viewer: CvPreviewViewer) {
     const position = await cvsRepository.findPositionForPreview(positionId);
 
     if (!position) {
       throw new AppError(404, "Position not found");
     }
 
-    if (!canPreviewPosition(position, userId)) {
+    if (!canPreviewPosition(position, viewer)) {
       throw new AppError(403, "Position access denied");
     }
 
-    const profile = await cvsRepository.ensureCandidateProfileForPreview(userId);
+    const profile = await cvsRepository.ensureCandidateProfileForPreview(viewer.userId);
     const attributeIds = position.attributes.map(({ attribute }) => attribute.id);
     const [attributeValues, projects] = await Promise.all([
       cvsRepository.findCandidateAttributeValues(profile.id, attributeIds),

@@ -34,6 +34,7 @@ import type {
   UpdatePositionAccessPayload,
   UpdatePositionPayload
 } from "../../../entities/position/model/types";
+import { useCurrentUser } from "../../../entities/user/model/use-current-user";
 import { getApiErrorMessage } from "../../../shared/api/client";
 import { routes } from "../../../shared/routes/paths";
 
@@ -92,6 +93,7 @@ export default function PositionsPage() {
   const deleteMutation = useDeletePositionMutation();
   const duplicateMutation = useDuplicatePositionMutation();
   const updateAccessMutation = useUpdatePositionAccessMutation();
+  const currentUserQuery = useCurrentUser();
 
   const positionParams: GetPositionsParams = {
     prefix: filters.prefix.trim() || undefined,
@@ -123,6 +125,10 @@ export default function PositionsPage() {
   const positions = positionsQuery.data?.items ?? [];
   const pagination = positionsQuery.data?.pagination;
   const attributes = attributesQuery.data?.items ?? [];
+  const currentUser = currentUserQuery.data?.authenticated ? currentUserQuery.data.user : null;
+  const canPreviewCv = Boolean(
+    currentUser?.roles.some((role) => role.code === "CANDIDATE" || role.code === "ADMIN")
+  );
 
   const selectedPositionFromList =
     positions.find((position) => position.id === selectedPositionId) ?? null;
@@ -228,7 +234,7 @@ export default function PositionsPage() {
         <div>
           <h1>Positions</h1>
           <p className="text-muted mb-0">
-            Browse recruiter-created positions and their required profile fields.
+            Browse recruiter-created positions available to you.
           </p>
         </div>
       </div>
@@ -321,6 +327,9 @@ export default function PositionsPage() {
                 ? `Selected: ${selectedPosition.title}`
                 : "Select a row to view details or use selected actions."}
             </div>
+            {selectedPosition && !canPreviewCv ? (
+              <div className="text-muted small">Sign in as a candidate or admin to preview a CV.</div>
+            ) : null}
           </div>
 
           <ButtonGroup className="flex-wrap">
@@ -354,7 +363,7 @@ export default function PositionsPage() {
 
             <Button
               variant="outline-secondary"
-              disabled={!selectedPositionId}
+              disabled={!selectedPositionId || !canPreviewCv}
               onClick={previewSelectedPosition}
             >
               Preview CV

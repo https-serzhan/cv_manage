@@ -6,7 +6,8 @@ import type {
   PositionAttributeData,
   PositionData,
   PositionAccessRecord,
-  PositionRecord
+  PositionRecord,
+  PositionVisibility
 } from "./positions.repository.js";
 import type {
   CreatePositionBody,
@@ -17,6 +18,25 @@ import type {
 } from "./positions.validation.js";
 
 type PositionBody = CreatePositionBody | UpdatePositionBody;
+export type PositionViewer = {
+  userId: string;
+  roleCodes: string[];
+} | null;
+
+function canSeeAllPositions(viewer: PositionViewer): boolean {
+  return Boolean(
+    viewer?.roleCodes.some((roleCode) => roleCode === "RECRUITER" || roleCode === "ADMIN")
+  );
+}
+
+function toPositionVisibility(viewer: PositionViewer): PositionVisibility {
+  return viewer
+    ? {
+        userId: viewer.userId,
+        canSeeAll: canSeeAllPositions(viewer)
+      }
+    : null;
+}
 
 function optionalString(value: string | null | undefined): string | null {
   const normalized = value?.trim();
@@ -148,16 +168,19 @@ async function normalizePositionInput(data: PositionBody) {
 }
 
 export const positionsService = {
-  async getPositions(filters: ListPositionsQuery) {
-    const result = await positionsRepository.findPositions(filters);
+  async getPositions(filters: ListPositionsQuery, viewer: PositionViewer) {
+    const result = await positionsRepository.findPositions(filters, toPositionVisibility(viewer));
 
     return {
       items: result.items.map(toPositionDto),
       pagination: result.pagination
     };
   },
-  async getPositionById(id: string) {
-    const position = await positionsRepository.findPositionById(id);
+  async getPositionById(id: string, viewer: PositionViewer) {
+    const position = await positionsRepository.findVisiblePositionById(
+      id,
+      toPositionVisibility(viewer)
+    );
 
     if (!position) {
       throw new AppError(404, "Position not found");
