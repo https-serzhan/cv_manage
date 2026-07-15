@@ -94,6 +94,10 @@ export default function PositionsPage() {
   const duplicateMutation = useDuplicatePositionMutation();
   const updateAccessMutation = useUpdatePositionAccessMutation();
   const currentUserQuery = useCurrentUser();
+  const currentUser = currentUserQuery.data?.authenticated ? currentUserQuery.data.user : null;
+  const roleCodes = currentUser?.roles.map((role) => role.code) ?? [];
+  const canManagePositions = roleCodes.includes("RECRUITER") || roleCodes.includes("ADMIN");
+  const canPreviewCv = roleCodes.includes("CANDIDATE") || roleCodes.includes("ADMIN");
 
   const positionParams: GetPositionsParams = {
     prefix: filters.prefix.trim() || undefined,
@@ -115,7 +119,9 @@ export default function PositionsPage() {
   );
   const selectedAccessQuery = usePositionAccessQuery(
     selectedPositionId ?? "",
-    Boolean(selectedPositionId) && (activeAction === "edit" || activeAction === "access")
+    canManagePositions &&
+      Boolean(selectedPositionId) &&
+      (activeAction === "edit" || activeAction === "access")
   );
   const attributesQuery = useAttributesQuery({
     page: 1,
@@ -125,10 +131,6 @@ export default function PositionsPage() {
   const positions = positionsQuery.data?.items ?? [];
   const pagination = positionsQuery.data?.pagination;
   const attributes = attributesQuery.data?.items ?? [];
-  const currentUser = currentUserQuery.data?.authenticated ? currentUserQuery.data.user : null;
-  const canPreviewCv = Boolean(
-    currentUser?.roles.some((role) => role.code === "CANDIDATE" || role.code === "ADMIN")
-  );
 
   const selectedPositionFromList =
     positions.find((position) => position.id === selectedPositionId) ?? null;
@@ -325,58 +327,72 @@ export default function PositionsPage() {
             <div className="text-muted small">
               {selectedPosition
                 ? `Selected: ${selectedPosition.title}`
-                : "Select a row to view details or use selected actions."}
+                : canManagePositions || canPreviewCv
+                  ? "Select a row to view details or use selected actions."
+                  : "Select a row to view details."}
             </div>
-            {selectedPosition && !canPreviewCv ? (
-              <div className="text-muted small">Sign in as a candidate or admin to preview a CV.</div>
+            {selectedPosition && !canPreviewCv && !canManagePositions ? (
+              <div className="text-muted small">
+                Sign in as a candidate to preview a CV.
+              </div>
             ) : null}
           </div>
 
-          <ButtonGroup className="flex-wrap">
-            <Button variant="primary" onClick={() => setActiveAction("create")}>
-              Create
-            </Button>
+          {canManagePositions || canPreviewCv ? (
+            <ButtonGroup className="flex-wrap">
+              {canManagePositions ? (
+                <>
+                  <Button variant="primary" onClick={() => setActiveAction("create")}>
+                    Create
+                  </Button>
 
-            <Button
-              variant="outline-primary"
-              disabled={!selectedPosition}
-              onClick={() => setActiveAction("edit")}
-            >
-              Edit selected
-            </Button>
+                  <Button
+                    variant="outline-primary"
+                    disabled={!selectedPosition}
+                    onClick={() => setActiveAction("edit")}
+                  >
+                    Edit selected
+                  </Button>
 
-            <Button
-              variant="outline-secondary"
-              disabled={!selectedPosition}
-              onClick={() => setActiveAction("duplicate")}
-            >
-              Duplicate selected
-            </Button>
+                  <Button
+                    variant="outline-secondary"
+                    disabled={!selectedPosition}
+                    onClick={() => setActiveAction("duplicate")}
+                  >
+                    Duplicate selected
+                  </Button>
 
-            <Button
-              variant="outline-secondary"
-              disabled={!selectedPosition}
-              onClick={() => setActiveAction("access")}
-            >
-              Access
-            </Button>
+                  <Button
+                    variant="outline-secondary"
+                    disabled={!selectedPosition}
+                    onClick={() => setActiveAction("access")}
+                  >
+                    Access
+                  </Button>
+                </>
+              ) : null}
 
-            <Button
-              variant="outline-secondary"
-              disabled={!selectedPositionId || !canPreviewCv}
-              onClick={previewSelectedPosition}
-            >
-              Preview CV
-            </Button>
+              {canPreviewCv ? (
+                <Button
+                  variant="outline-secondary"
+                  disabled={!selectedPositionId}
+                  onClick={previewSelectedPosition}
+                >
+                  Preview CV
+                </Button>
+              ) : null}
 
-            <Button
-              variant="outline-danger"
-              disabled={!selectedPosition}
-              onClick={() => setActiveAction("delete")}
-            >
-              Delete selected
-            </Button>
-          </ButtonGroup>
+              {canManagePositions ? (
+                <Button
+                  variant="outline-danger"
+                  disabled={!selectedPosition}
+                  onClick={() => setActiveAction("delete")}
+                >
+                  Delete selected
+                </Button>
+              ) : null}
+            </ButtonGroup>
+          ) : null}
         </div>
       </div>
 
@@ -529,44 +545,48 @@ export default function PositionsPage() {
         </div>
       ) : null}
 
-      <PositionFormModal
-        accessError={selectedAccessQuery.error}
-        accessIsError={selectedAccessQuery.isError}
-        accessIsLoading={selectedAccessQuery.isLoading}
-        availableAttributes={attributes}
-        initialAllowedCandidateIds={selectedAccessIds}
-        mode={activeAction === "edit" ? "edit" : "create"}
-        open={activeAction === "create" || activeAction === "edit"}
-        position={activeAction === "edit" ? selectedPosition : null}
-        onClose={() => setActiveAction(null)}
-        onCreate={createPosition}
-        onUpdate={updatePosition}
-      />
+      {canManagePositions ? (
+        <>
+          <PositionFormModal
+            accessError={selectedAccessQuery.error}
+            accessIsError={selectedAccessQuery.isError}
+            accessIsLoading={selectedAccessQuery.isLoading}
+            availableAttributes={attributes}
+            initialAllowedCandidateIds={selectedAccessIds}
+            mode={activeAction === "edit" ? "edit" : "create"}
+            open={activeAction === "create" || activeAction === "edit"}
+            position={activeAction === "edit" ? selectedPosition : null}
+            onClose={() => setActiveAction(null)}
+            onCreate={createPosition}
+            onUpdate={updatePosition}
+          />
 
-      <DuplicatePositionModal
-        open={activeAction === "duplicate"}
-        position={selectedPosition}
-        onClose={() => setActiveAction(null)}
-        onSubmit={duplicatePosition}
-      />
+          <DuplicatePositionModal
+            open={activeAction === "duplicate"}
+            position={selectedPosition}
+            onClose={() => setActiveAction(null)}
+            onSubmit={duplicatePosition}
+          />
 
-      <PositionAccessModal
-        access={selectedAccessQuery.data}
-        error={selectedAccessQuery.error}
-        isError={selectedAccessQuery.isError}
-        isLoading={selectedAccessQuery.isLoading}
-        open={activeAction === "access"}
-        position={selectedPosition}
-        onClose={() => setActiveAction(null)}
-        onSubmit={updatePositionAccess}
-      />
+          <PositionAccessModal
+            access={selectedAccessQuery.data}
+            error={selectedAccessQuery.error}
+            isError={selectedAccessQuery.isError}
+            isLoading={selectedAccessQuery.isLoading}
+            open={activeAction === "access"}
+            position={selectedPosition}
+            onClose={() => setActiveAction(null)}
+            onSubmit={updatePositionAccess}
+          />
 
-      <DeletePositionModal
-        open={activeAction === "delete"}
-        position={selectedPosition}
-        onClose={() => setActiveAction(null)}
-        onConfirm={deletePosition}
-      />
+          <DeletePositionModal
+            open={activeAction === "delete"}
+            position={selectedPosition}
+            onClose={() => setActiveAction(null)}
+            onConfirm={deletePosition}
+          />
+        </>
+      ) : null}
     </section>
   );
 }
