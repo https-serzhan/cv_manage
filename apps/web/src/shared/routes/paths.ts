@@ -4,5 +4,6 @@ export const routes = {
   profile: "/profile",
   positions: "/positions",
   cvPreview: (positionId: string) => `/cvs/preview/${positionId}`,
+  adminUsers: "/admin/users",
   signIn: "/sign-in"
 } as const;

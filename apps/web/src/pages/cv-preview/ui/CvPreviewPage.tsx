@@ -162,9 +162,7 @@ function CvPreviewContent({ preview }: { preview: CvPreviewDto }) {
         {hasMissingRequiredAttributes ? (
           <Alert variant="warning" className="mb-0">
             <div className="fw-semibold mb-2">Missing required attributes</div>
-            <p className="mb-2">
-              Update your profile to improve readiness for {position.title}.
-            </p>
+            <p className="mb-2">Update your profile to improve readiness for {position.title}.</p>
             <div className="profile-tag-list mb-3">
               {preview.missingRequiredAttributes.map((attribute) => (
                 <Badge bg="warning" text="dark" key={attribute.attributeId}>
@@ -175,14 +173,6 @@ function CvPreviewContent({ preview }: { preview: CvPreviewDto }) {
             <Link className="btn btn-outline-warning" to={routes.profile}>
               Edit profile
             </Link>
-          </Alert>
-        ) : null}
-
-        {includedProjectCount === 0 ? (
-          <Alert variant={hasProjectTagFilter ? "warning" : "info"} className="mb-0">
-            {hasProjectTagFilter
-              ? `No candidate projects matched the position project tags: ${projectTagNames}.`
-              : "No candidate projects are included in this preview."}
           </Alert>
         ) : null}
 

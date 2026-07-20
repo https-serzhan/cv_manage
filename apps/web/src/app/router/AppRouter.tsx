@@ -5,6 +5,7 @@ import { AppLayout } from "../layouts/AppLayout";
 
 const HomePage = lazy(() => import("../../pages/home/HomePage"));
 const SignInPage = lazy(() => import("../../pages/sign-in/SignInPage"));
+const AdminUsersPage = lazy(() => import("../../pages/admin-users/ui/AdminUsersPage"));
 const AttributeLibraryPage = lazy(
   () => import("../../pages/attribute-library/ui/AttributeLibraryPage")
 );
@@ -14,16 +15,16 @@ const PositionsPage = lazy(() => import("../../pages/positions/ui/PositionsPage"
 
 const router = createBrowserRouter([
   {
+    path: "/sign-in",
+    element: <SignInPage />
+  },
+  {
     path: "/",
     element: <AppLayout />,
     children: [
       {
         index: true,
         element: <HomePage />
-      },
-      {
-        path: "sign-in",
-        element: <SignInPage />
       },
       {
         path: "attributes",
@@ -40,6 +41,10 @@ const router = createBrowserRouter([
       {
         path: "cvs/preview/:positionId",
         element: <CvPreviewPage />
+      },
+      {
+        path: "admin/users",
+        element: <AdminUsersPage />
       }
     ]
   }

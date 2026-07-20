@@ -7,6 +7,7 @@ import helmet from "helmet";
 import morgan from "morgan";
 import passport from "passport";
 
+import { adminRouter } from "../modules/admin/admin.routes.js";
 import { authRouter } from "../modules/auth/auth.routes.js";
 import { attributesRouter } from "../modules/attributes/attributes.routes.js";
 import { configurePassport } from "../modules/auth/passport.js";
@@ -69,6 +70,7 @@ export function createApp(): Express {
   app.use("/api/profile", profileRouter);
   app.use("/api/positions", positionsRouter);
   app.use("/api/cvs", cvsRouter);
+  app.use("/api/admin", adminRouter);
 
   app.use(notFoundMiddleware);
   app.use(errorMiddleware);

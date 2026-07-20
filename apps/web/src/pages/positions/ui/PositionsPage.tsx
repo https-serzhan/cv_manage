@@ -229,15 +229,14 @@ export default function PositionsPage() {
 
   const canGoPrevious = filters.page > 1;
   const canGoNext = pagination ? filters.page < pagination.totalPages : false;
+  const hasPositionActions = canManagePositions || canPreviewCv;
 
   return (
     <section className="page-section">
       <div className="page-header">
         <div>
           <h1>Positions</h1>
-          <p className="text-muted mb-0">
-            Browse recruiter-created positions available to you.
-          </p>
+          <p className="text-muted mb-0">Browse recruiter-created positions available to you.</p>
         </div>
       </div>
 
@@ -320,25 +319,18 @@ export default function PositionsPage() {
         ) : null}
       </div>
 
-      <div className="mt-4 rounded border bg-body p-3">
-        <div className="d-flex flex-wrap align-items-center justify-content-between gap-3">
-          <div>
-            <strong>Position actions</strong>
-            <div className="text-muted small">
-              {selectedPosition
-                ? `Selected: ${selectedPosition.title}`
-                : canManagePositions || canPreviewCv
-                  ? "Select a row to view details or use selected actions."
-                  : "Select a row to view details."}
-            </div>
-            {selectedPosition && !canPreviewCv && !canManagePositions ? (
+      {hasPositionActions ? (
+        <div className="mt-4 rounded border bg-body p-3">
+          <div className="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+              <strong>Position actions</strong>
               <div className="text-muted small">
-                Sign in as a candidate to preview a CV.
+                {selectedPosition
+                  ? `Selected: ${selectedPosition.title}`
+                  : "Select a row to view details or use selected actions."}
               </div>
-            ) : null}
-          </div>
+            </div>
 
-          {canManagePositions || canPreviewCv ? (
             <ButtonGroup className="flex-wrap">
               {canManagePositions ? (
                 <>
@@ -392,9 +384,9 @@ export default function PositionsPage() {
                 </Button>
               ) : null}
             </ButtonGroup>
-          ) : null}
+          </div>
         </div>
-      </div>
+      ) : null}
 
       {selectedPositionId ? (
         <PositionDetailsPanel

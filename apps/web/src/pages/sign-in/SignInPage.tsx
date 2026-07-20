@@ -16,20 +16,31 @@ export default function SignInPage() {
 
   return (
     <section className="sign-in-page">
-      <Stack gap={3} className="sign-in-panel">
-        <div>
-          <h1 className="h3 mb-2">Sign in</h1>
-          <p className="text-secondary mb-0">Use a connected provider to access the platform.</p>
+      <div className="sign-in-layout">
+        <div className="sign-in-copy">
+          <span className="sign-in-copy__label">CV Platform</span>
+          <h1>Sign in to your workspace</h1>
+          <p>
+            Continue with an approved social provider to manage profiles, positions, and CV
+            previews.
+          </p>
         </div>
 
-        {hasAuthFailure ? (
-          <Alert variant="warning" className="mb-0">
-            Sign-in failed. Check provider configuration or try again.
-          </Alert>
-        ) : null}
+        <Stack gap={3} className="sign-in-panel">
+          <div>
+            <h2 className="h4 mb-2">Welcome back</h2>
+            <p className="text-secondary mb-0">Choose a provider to continue.</p>
+          </div>
 
-        <ProviderSignInButtons />
-      </Stack>
+          {hasAuthFailure ? (
+            <Alert variant="warning" className="mb-0">
+              Sign-in failed. Check provider configuration or try again.
+            </Alert>
+          ) : null}
+
+          <ProviderSignInButtons />
+        </Stack>
+      </div>
     </section>
   );
 }
