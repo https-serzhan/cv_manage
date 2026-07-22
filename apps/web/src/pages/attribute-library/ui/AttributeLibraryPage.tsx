@@ -6,6 +6,7 @@ import {
   useAttributeCategoriesQuery,
   useAttributesQuery
 } from "../../../entities/attribute/model/queries";
+import { useCurrentUser } from "../../../entities/user/model/use-current-user";
 import { AttributeFilters } from "../../../features/attribute-filters/ui/AttributeFilters";
 import { CreateAttributeModal } from "../../../features/create-attribute/ui/CreateAttributeModal";
 import { DeleteAttributeModal } from "../../../features/delete-attribute/ui/DeleteAttributeModal";
@@ -37,6 +38,10 @@ export default function AttributeLibraryPage() {
 
   const categoriesQuery = useAttributeCategoriesQuery();
   const attributesQuery = useAttributesQuery(filters);
+  const currentUserQuery = useCurrentUser();
+  const currentUser = currentUserQuery.data?.authenticated ? currentUserQuery.data.user : null;
+  const roleCodes = currentUser?.roles.map((role) => role.code) ?? [];
+  const canManageAttributes = roleCodes.includes("RECRUITER") || roleCodes.includes("ADMIN");
   const categories = categoriesQuery.data ?? [];
   const attributes = attributesQuery.data?.items ?? [];
   const pagination = attributesQuery.data?.pagination;
@@ -98,29 +103,31 @@ export default function AttributeLibraryPage() {
 
         <AttributeFilters categories={categories} values={filters} onApply={applyFilters} />
 
-        <div className="attribute-toolbar">
-          <ButtonGroup>
-            <Button type="button" onClick={() => setActiveModal("create")}>
-              Create
-            </Button>
-            <Button
-              type="button"
-              variant="outline-primary"
-              disabled={!selectedAttribute}
-              onClick={() => setActiveModal("edit")}
-            >
-              Edit selected
-            </Button>
-            <Button
-              type="button"
-              variant="outline-danger"
-              disabled={!selectedAttribute}
-              onClick={() => setActiveModal("delete")}
-            >
-              Delete selected
-            </Button>
-          </ButtonGroup>
-        </div>
+        {canManageAttributes ? (
+          <div className="attribute-toolbar">
+            <ButtonGroup>
+              <Button type="button" onClick={() => setActiveModal("create")}>
+                Create
+              </Button>
+              <Button
+                type="button"
+                variant="outline-primary"
+                disabled={!selectedAttribute}
+                onClick={() => setActiveModal("edit")}
+              >
+                Edit selected
+              </Button>
+              <Button
+                type="button"
+                variant="outline-danger"
+                disabled={!selectedAttribute}
+                onClick={() => setActiveModal("delete")}
+              >
+                Delete selected
+              </Button>
+            </ButtonGroup>
+          </div>
+        ) : null}
 
         {isInitialLoading ? (
           <div className="attribute-loading">
@@ -229,23 +236,27 @@ export default function AttributeLibraryPage() {
         ) : null}
       </Stack>
 
-      <CreateAttributeModal
-        show={activeModal === "create"}
-        categories={categories}
-        onHide={() => setActiveModal(null)}
-      />
-      <EditAttributeModal
-        show={activeModal === "edit"}
-        attribute={selectedAttribute}
-        categories={categories}
-        onHide={() => setActiveModal(null)}
-      />
-      <DeleteAttributeModal
-        show={activeModal === "delete"}
-        attribute={selectedAttribute}
-        onDeleted={() => setSelectedAttributeId(null)}
-        onHide={() => setActiveModal(null)}
-      />
+      {canManageAttributes ? (
+        <>
+          <CreateAttributeModal
+            show={activeModal === "create"}
+            categories={categories}
+            onHide={() => setActiveModal(null)}
+          />
+          <EditAttributeModal
+            show={activeModal === "edit"}
+            attribute={selectedAttribute}
+            categories={categories}
+            onHide={() => setActiveModal(null)}
+          />
+          <DeleteAttributeModal
+            show={activeModal === "delete"}
+            attribute={selectedAttribute}
+            onDeleted={() => setSelectedAttributeId(null)}
+            onHide={() => setActiveModal(null)}
+          />
+        </>
+      ) : null}
     </section>
   );
 }

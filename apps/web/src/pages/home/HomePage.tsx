@@ -40,14 +40,12 @@ export default function HomePage() {
     });
   }
 
-  cards.push(
-    {
-      title: "Positions",
-      description: "Browse available positions or manage position templates based on your role.",
-      to: routes.positions,
-      action: "Open positions"
-    }
-  );
+  cards.push({
+    title: "Positions",
+    description: "Browse available positions or manage position templates based on your role.",
+    to: routes.positions,
+    action: "Open positions"
+  });
 
   if (canPreviewCv) {
     cards.push({
