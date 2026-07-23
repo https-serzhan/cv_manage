@@ -16,7 +16,7 @@ import { healthRouter } from "../modules/health/health.routes.js";
 import { profileRouter } from "../modules/profile/profile.routes.js";
 import { positionsRouter } from "../modules/positions/positions.routes.js";
 import { env } from "./env.js";
-import { logger } from "../shared/logger/index.js";
+import { sessionStore } from "../shared/db/session-store.js";
 import { errorMiddleware } from "../shared/middleware/error-handler.js";
 import { notFoundMiddleware } from "../shared/middleware/not-found.js";
 
@@ -25,12 +25,10 @@ const sessionMaxAgeMs = 1000 * 60 * 60 * 24 * 7;
 
 export function createApp(): Express {
   const app = express();
+  const isProduction = env.NODE_ENV === "production";
 
-  if (env.NODE_ENV === "production") {
+  if (isProduction) {
     app.set("trust proxy", 1);
-    logger.warn(
-      "express-session MemoryStore is development-only. Configure a durable session store before production deployment."
-    );
   }
 
   configurePassport();
@@ -41,15 +39,17 @@ export function createApp(): Express {
   app.use(cookieParser());
   app.use(
     session({
+      store: sessionStore,
       name: sessionCookieName,
       secret: env.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
+        path: "/",
         maxAge: sessionMaxAgeMs,
-        sameSite: "lax",
-        secure: env.NODE_ENV === "production"
+        sameSite: isProduction ? "none" : "lax",
+        secure: isProduction
       }
     })
   );

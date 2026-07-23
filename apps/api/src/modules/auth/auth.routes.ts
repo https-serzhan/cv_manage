@@ -9,6 +9,7 @@ import { isAuthenticatedUser } from "./auth.types.js";
 import { isAuthProviderEnabled } from "./passport.js";
 
 const sessionCookieName = "cv.sid";
+const isProduction = env.NODE_ENV === "production";
 
 export const authRouter: ExpressRouter = Router();
 
@@ -109,7 +110,12 @@ authRouter.post("/logout", (request, response, next) => {
         return;
       }
 
-      response.clearCookie(sessionCookieName);
+      response.clearCookie(sessionCookieName, {
+        httpOnly: true,
+        path: "/",
+        sameSite: isProduction ? "none" : "lax",
+        secure: isProduction
+      });
       response.status(200).json({
         authenticated: false,
         user: null

@@ -154,6 +154,93 @@ pnpm lint
 pnpm build
 ```
 
+## Deployment
+
+### Frontend on Vercel Hobby
+
+- Project root directory: `apps/web`
+- Framework preset: Vite
+- Build command: `pnpm build`
+- Output directory: `dist`
+- Required variable: `VITE_API_BASE_URL=https://<render-api>.onrender.com`
+- `apps/web/vercel.json` provides the SPA fallback for direct route loads and browser refresh
+
+### Backend on Render Free
+
+1. Create a Render account.
+2. Create a Web Service from the GitHub repository or create a Blueprint from `render.yaml`.
+3. Select the free plan.
+4. Keep the repository root as the monorepo root.
+5. Render uses `render.yaml` for the API build command, start command, environment variable names, and `/health` health check.
+6. Set the API environment variables in Render.
+7. Use the public Render API URL for `API_BASE_URL` and `VITE_API_BASE_URL`.
+8. Verify `https://<render-service>.onrender.com/health`.
+
+Render Free Web Services spin down when idle. The first request after inactivity can take time while the service wakes. For a presentation or demo, open `/health` shortly before presenting.
+
+Render commands configured in `render.yaml`:
+
+```bash
+pnpm install --frozen-lockfile && pnpm --filter @cv-platform/api exec prisma generate --schema src/prisma/schema.prisma && pnpm --filter @cv-platform/api build
+pnpm --filter @cv-platform/api exec prisma migrate deploy --schema src/prisma/schema.prisma && pnpm --filter @cv-platform/api start
+```
+
+Required Render environment variables:
+
+```text
+NODE_ENV=production
+DATABASE_URL
+SESSION_SECRET
+API_BASE_URL=https://<render-service>.onrender.com
+WEB_BASE_URL=https://<vercel-project>.vercel.app
+GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET
+GITHUB_CLIENT_ID
+GITHUB_CLIENT_SECRET
+```
+
+Render supplies `PORT`; do not configure it manually.
+
+### Database on Neon Free
+
+1. Create a Neon account.
+2. Create a PostgreSQL project and database on the free plan.
+3. Copy the PostgreSQL connection string.
+4. Store it in Render as `DATABASE_URL`.
+5. Do not expose `DATABASE_URL` to Vercel or frontend code.
+6. Prisma migrations run through `prisma migrate deploy` when Render starts or deploys.
+7. The same Neon database stores application data and persistent `user_sessions`.
+
+Production migrations run with `prisma migrate deploy` before the API starts. The seed command remains available for intentional first deployment or demo setup only and is not run automatically on every deploy.
+
+To seed production demo data intentionally, temporarily point a local shell at the Neon connection string, run the existing seed command, then restore the local environment:
+
+```bash
+DATABASE_URL="postgresql://..." pnpm prisma:seed
+```
+
+Do not add seed execution to the Render start command.
+
+### OAuth
+
+Google authorized redirect URI:
+
+```text
+https://<render-service>.onrender.com/auth/google/callback
+```
+
+GitHub authorization callback URL:
+
+```text
+https://<render-service>.onrender.com/auth/github/callback
+```
+
+`API_BASE_URL` must be the Render API origin. `WEB_BASE_URL` must be the Vercel frontend origin and must match the frontend that sends credentialed requests.
+
+### Sessions
+
+Production sessions are stored in PostgreSQL in `user_sessions`. Production cookies use HTTPS and cross-site settings for a separately hosted Vercel frontend and Render API. Frontend API requests send credentials.
+
 ## Roles
 
 - `CANDIDATE`: manages their own profile, attribute values, projects, and can preview CVs for positions available to them.
@@ -220,11 +307,11 @@ Seed reruns reuse stable categories, attributes, dropdown options, and project t
 
 ## First Admin Bootstrap
 
-On a fresh database, the first OAuth login creates a user with the default `CANDIDATE` role. The Admin Users page requires an existing `ADMIN`, so one admin user must be bootstrapped through Prisma Studio in development.
+On a fresh database, the first OAuth login creates a user with the default `CANDIDATE` role. The Admin Users page requires an existing `ADMIN`, so one admin user must be bootstrapped through Prisma Studio against the target database.
 
-1. Start PostgreSQL and the application.
+1. Start the application and connect it to the target PostgreSQL database.
 2. Sign in once with Google or GitHub so the `User` record is created.
-3. Open Prisma Studio:
+3. Open Prisma Studio from a shell where `DATABASE_URL` points to that database:
 
 ```bash
 pnpm --filter @cv-platform/api exec prisma studio --schema src/prisma/schema.prisma

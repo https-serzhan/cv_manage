@@ -1,16 +1,16 @@
 import { Button, Stack } from "react-bootstrap";
 
-import { apiBaseUrl } from "../../../shared/api/client";
+import { createApiUrl } from "../../../shared/api/client";
 
 const providers = [
   {
     label: "Continue with Google",
-    href: `${apiBaseUrl}/auth/google`,
+    href: createApiUrl("/auth/google"),
     variant: "outline-primary"
   },
   {
     label: "Continue with GitHub",
-    href: `${apiBaseUrl}/auth/github`,
+    href: createApiUrl("/auth/github"),
     variant: "outline-dark"
   }
 ] as const;

@@ -1,4 +1,16 @@
-export const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:4000";
+const defaultApiBaseUrl = "http://localhost:4000";
+
+function normalizeApiBaseUrl(value: string): string {
+  return value.replace(/\/+$/, "");
+}
+
+export const apiBaseUrl = normalizeApiBaseUrl(
+  import.meta.env.VITE_API_BASE_URL?.trim() || defaultApiBaseUrl
+);
+
+export function createApiUrl(path: string): string {
+  return `${apiBaseUrl}${path.startsWith("/") ? path : `/${path}`}`;
+}
 
 type ApiErrorIssue = {
   path?: Array<string | number>;
@@ -67,7 +79,7 @@ export async function apiRequest<TResponse>(
   options: ApiRequestOptions = {}
 ): Promise<TResponse> {
   const { skipJsonContentType, headers, ...requestOptions } = options;
-  const response = await fetch(`${apiBaseUrl}${path}`, {
+  const response = await fetch(createApiUrl(path), {
     credentials: "include",
     headers: {
       ...(skipJsonContentType ? {} : { "Content-Type": "application/json" }),

@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@11.9.0",
   "scripts": {
     "dev": "pnpm -r --parallel --filter @cv-platform/web --filter @cv-platform/api dev",
     "dev:web": "pnpm --filter @cv-platform/web dev",

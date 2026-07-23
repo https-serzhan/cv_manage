@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: cv-management-api
+    runtime: node
+    plan: free
+    autoDeployTrigger: commit
+    healthCheckPath: /health
+    buildCommand: pnpm install --frozen-lockfile && pnpm --filter @cv-platform/api exec prisma generate --schema src/prisma/schema.prisma && pnpm --filter @cv-platform/api build
+    startCommand: pnpm --filter @cv-platform/api exec prisma migrate deploy --schema src/prisma/schema.prisma && pnpm --filter @cv-platform/api start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+      - key: API_BASE_URL
+        sync: false
+      - key: WEB_BASE_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
